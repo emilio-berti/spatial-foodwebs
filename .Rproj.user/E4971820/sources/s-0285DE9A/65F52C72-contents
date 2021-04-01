@@ -1,0 +1,26 @@
+library(tidyverse)
+library(sf)
+library(ncdf4)
+library(raster)
+
+ctd <- nc_open("/home/eb97ziwi/Documents/databases/NOAA_thermoclines/1.1/data/0-data/WODCTDtempNCEI.nc")
+xbt <- nc_open("/home/eb97ziwi/Documents/databases/NOAA_thermoclines/1.1/data/0-data/WODXBTtempNCEI.nc")
+
+names(ctd$var)
+# isothermal layer depth from ctd ---------
+p <- tibble(lon = ncvar_get(ctd, "Longitude") - 200, #see Chu & Fan 2019
+            lat = ncvar_get(ctd, "Latitude"),
+            iso_depth = ncvar_get(ctd, "IsoLayerDepth"),
+            year = ncvar_get(ctd, "year")) %>% 
+  group_by(lon, lat) %>% 
+  summarize(avg_iso_depth = mean(iso_depth, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  st_as_sf(coords = c("lon", "lat"))
+# rasterize ctd & xbt --------
+r_template <- raster(p, nrows = 100, ncols = 100)
+r_ctd <- rasterize(as_Spatial(p), r_template, field = "avg_iso_depth", background = NA)
+# interpolate
+xy <- xyFromCell(r_ctd, 1:ncell(r_ctd))
+v <- getValues(r_ctd)
+interpolate(r_ctd, fields::Tps(xy, v))
+plot(r_ctd)

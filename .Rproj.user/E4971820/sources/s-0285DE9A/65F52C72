@@ -1,0 +1,25 @@
+{
+    "id": "65F52C72",
+    "path": "~/Proj/multivar-marine-networks/R/isothermal_layer.R",
+    "project_path": "R/isothermal_layer.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": true,
+    "created": 1617275397477.0,
+    "source_on_save": false,
+    "relative_order": 6,
+    "properties": {
+        "tempName": "Untitled3",
+        "cursorPosition": "25,0",
+        "scrollLine": "7"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1617275802,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1617275977980,
+    "read_only": false,
+    "read_only_alternatives": []
+}

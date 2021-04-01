@@ -1,0 +1,512 @@
+# correlation --------
+angles <- bind_rows(
+rda$co %>%
+tibble() %>%
+mutate(var = rownames(rda$co),
+type = "response"),
+rda$cor %>%
+tibble() %>%
+mutate(var = rownames(rda$cor),
+type = "mem") %>%
+rename_with(~gsub("RS", "Comp", .x), starts_with("RS"))
+) %>%
+mutate(angle = modify2(Comp1, Comp2, function(x, y) get_angle(x, y))) %>%
+select(var, angle)
+correlation <- matrix(NA, nrow = nrow(angles), ncol = nrow(angles))
+rownames(correlation) <- angles$var
+colnames(correlation) <- angles$var
+for (i in seq_len(nrow(correlation))) {
+for (j in seq_len(ncol(correlation))) {
+vals <- angles %>%
+filter(var %in% c(colnames(correlation)[j], rownames(correlation)[i])) %>%
+pull(angle)
+if (length(vals) == 1) {
+vals <- rep(vals, 2)
+}
+correlation[i, j] <- cos(diff(vals))
+}
+}
+# correlatiom plot --------
+non_mems <- rownames(correlation)[!grepl("MEM", rownames(correlation))]
+corrplot::corrplot.mixed(correlation[non_mems, non_mems],
+diag = NULL,
+lower = "number",
+bg = "grey20",
+tl.pos = "lt",
+tl.col = c(rep("steelblue", 14),
+rep("tomato", 6),
+rep("forestgreen", 14)),
+number.cex = 0.8)
+randtest(rda)
+vp <- vegan::varpart(pca$tab, predictors[, 1:6], predictors[, 7:18])
+# variation partitioning ----------
+vp <- vegan::varpart(pca$tab, predictors[, 1:6], predictors[, 7:18])
+plot(vp, bg = c(3, 5), Xnames = c("Environment", "Spatial"))
+# scalograms ---------
+net <- st_read("data/marine.shp") %>%
+transmute(foodweb.name = fdwb_nm,
+geographic.location = ggrphc_) %>%
+left_join(read_csv("~/Proj/macro-net/env-net-dist/data/network_metrics.csv")) %>%
+filter_all(all_vars(!is.na(.))) %>%
+as_Spatial()
+neighs <- dnearneigh(net, d1 = 1, d2 = 50)
+listw <- nb2listw(neighs, zero.policy = TRUE)
+listw <- best_mems$lw.best
+ms <- adespatial::multispati(pca, listw, scannf = FALSE)
+ms <- adespatial::multispati(pca, listw, scannf = FALSE)
+listw
+listw$weights
+listw$weights %>% class()
+listw$weights[[1]]
+best_mems$best.method
+best_mems$best.method$summary
+best_mems$best.method.name
+neighs <- dnearneigh(net, style = "W")
+neighs <- dnearneigh(net)
+neighs <- dnearneigh(net, d1= 0)
+neighs <- dnearneigh(net, d1 = 0, d2 = 1000000)
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+ms <- adespatial::multispati(pca, listw, scannf = FALSE)
+neighs
+listw <- best_mems$lw.best
+ms <- adespatial::multispati(pca, listw, scannf = FALSE)
+# scalograms ---------
+scalogram(net$C, best_mems$best.method$MEM.select)
+# scalograms ---------
+plot(scalogram(net$C, best_mems$best.method$MEM.select))
+# scalograms ---------
+plot(scalogram(net$C, best_mems$best.method$MEM.select), nblocks = 20)
+# scalograms ---------
+plot(scalogram(net$C, best_mems$best.method$MEM.select, nblocks = 20))
+# scalograms ---------
+plot(scalogram(net$C, best_mems$best.method$summary, nblocks = 20))
+best_mems
+best_mems$best.method$summary
+best_mems$best.method$MEM.select
+# scalograms ---------
+mspa <- mspa(pca, best_mems$lw.best, scannf = FALSE, nf = 2)
+# scalograms ---------
+mem_dnear <- mem(listw)
+listw
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+neighs <- dnearneigh(net, d1 = 0)
+neighs <- dnearneigh(net, d1 = 0, d2 = 250125)
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+best_mems$lw.best
+listw2sn(best_mems$lw.best)
+neigh <- listw2sn(best_mems$lw.best)
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+listw <- nb2listw(neigh, zero.policy = TRUE, style = "W")
+spdep::listw2lines(best_mems$lw.best)
+neighs <- dnearneigh(net, d1 = 0, d2 = 10000)
+neighs
+neighs <- dnearneigh(net, d1 = 0, d2 = 1000)
+neighs
+neighs <- dnearneigh(net, d1 = 0, d2 = 5000)
+neighs
+neighs
+neighs <- dnearneigh(net, d1 = 0, d2 = 7000)
+neighs
+best_mems$lw.best
+neighs <- dnearneigh(net, d1 = 0, d2 = 10000)
+neighs
+summary(neighs)
+summary(neighs) ->a
+neighs
+best_mems$lw.best
+neighs
+best_mems$lw.best
+nb2listw(neighs, zero.policy = TRUE, style = "W")
+neighs <- dnearneigh(net, d1 = 0, d2 = 9000)
+nb2listw(neighs, zero.policy = TRUE, style = "W")
+neighs <- dnearneigh(net, d1 = 0, d2 = 8000)
+nb2listw(neighs, zero.policy = TRUE, style = "W")
+best_mems$lw.best
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+ms <- adespatial::multispati(pca, listw, scannf = FALSE)
+listw
+pca
+# PCA ---------
+pca <- dudi.pca(response,
+scale = TRUE,
+scannf = FALSE,
+nf = 3)
+ms <- adespatial::multispati(pca, listw, scannf = FALSE)
+nrow(response)
+listw
+# scalograms ---------
+net <- st_read("data/marine.shp") %>%
+transmute(foodweb.name = fdwb_nm,
+geographic.location = ggrphc_) %>%
+left_join(read_csv("~/Proj/macro-net/env-net-dist/data/network_metrics.csv")) %>%
+filter_all(all_vars(!is.na(.))) %>%
+distinct_all() %>%
+as_Spatial()
+net
+nrow(net)
+st_read("data/marine.shp") %>%
+transmute(foodweb.name = fdwb_nm,
+geographic.location = ggrphc_) %>%
+left_join(read_csv("~/Proj/macro-net/env-net-dist/data/network_metrics.csv")) %>%
+filter_all(all_vars(!is.na(.))) %>%
+distinct_all()
+nrow(p)
+nrow(d)
+d
+# scalograms ---------
+spp <- d %>%
+st_as_sf(coords = c("lon", "lat")) %>%
+as_Spatial()
+colnames(d)
+nrow(p)
+d
+left_join(d, p)
+# scalograms ---------
+spp <- left_join(d, p) %>%
+st_as_sf(coords = c("lon", "lat")) %>%
+as_Spatial()
+coords
+unique(coords)
+left_join(d, p)
+left_join(d, p) %>%
+st_coordinates()
+p
+left_join(d, p) %>%
+st_coordinates()
+right_join(p, d) %>%
+st_coordinates()
+# scalograms ---------
+spp <- right_join(p, d) %>%
+st_coordinates() %>%
+st_as_sf(coords = c("X", "Y")) %>%
+as_Spatial()
+# scalograms ---------
+spp <- right_join(p, d) %>%
+st_coordinates()
+head(spp)
+# scalograms ---------
+spp <- right_join(p, d) %>%
+st_coordinates() %>%
+st_as_sf(coords = c("X", "Y"))
+# scalograms ---------
+spp <- right_join(p, d) %>%
+st_coordinates() %>%
+as_tibble()
+spp
+# scalograms ---------
+spp <- right_join(p, d) %>%
+st_coordinates() %>%
+as_tibble() %>%
+st_as_sf(coords = c("X", "Y")) %>%
+as_Spatial()
+neighs <- dnearneigh(spp, d1 = 0, d2 = 8000) #d2 close enough to best
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+neighs <- dnearneigh(spp, d1 = 0, d2 = 7000) #d2 close enough to best
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+best_mems$lw.best
+listw
+neighs <- dnearneigh(spp, d1 = 0, d2 = 5000) #d2 close enough to best
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+neighs <- dnearneigh(spp, d1 = 0, d2 = 1000) #d2 close enough to best
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+# scalograms ---------
+spp <- right_join(p, d) %>%
+st_coordinates() %>%
+as_tibble() %>%
+st_as_sf(coords = c("X", "Y"), crs = "EPSG:4326") %>%
+as_Spatial()
+neighs <- dnearneigh(spp, d1 = 0, d2 = 1000) #d2 close enough to best
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+neighs <- dnearneigh(spp, d1 = 0, d2 = 1000) #d2 close enough to best
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+listw
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 5000) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 5000) #d2 close enough to best
+neighs
+best_mems$lw.best
+neighs <- dnearneigh(spp, d1 = 0, d2 = 5000) #d2 close enough to best
+neighs
+best_mems$lw.best
+neighs <- dnearneigh(spp, d1 = 0, d2 = 6000) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 6000) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 10000) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 9000) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 8000) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 7900) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 7000) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 7500) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 7800) #d2 close enough to best
+neighs
+neighs <- dnearneigh(spp, d1 = 0, d2 = 7900) #d2 close enough to best
+neighs
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+ms <- adespatial::multispati(pca, listw, scannf = FALSE)
+summary(ms)
+ms <- adespatial::multispati(pca, listw, scannf = FALSE)
+ms
+summary(ms)
+mem_dnear <- mem(listw)
+plot(scalogram(net$S, mem_dnear, nblocks = 20))
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+right_join(p, d) %>%
+muatete(coords = st_coordinates())
+right_join(p, d) %>%
+mutate(coords = st_coordinates())
+right_join(p, d) %>%
+mutate(coords = st_coordinates(.))
+right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble()
+right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>% colnames()
+# scalograms ---------
+spp <- right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>%
+st_as_sf(coords = coords, crs = "EPSG:4326") %>%
+as_Spatial()
+# scalograms ---------
+spp <- right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble()
+# scalograms ---------
+spp <- right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>%
+st_as_sf(coords = coords, crs = "EPSG:4326")
+# scalograms ---------
+spp <- right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>%
+unnest(cols = c(coords))
+# scalograms ---------
+spp <- right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>%
+st_as_sf(coords = c(coords[, 1], coords[, 2]), crs = "EPSG:4326") %>%
+as_Spatial()
+# scalograms ---------
+spp <- right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>%
+st_as_sf(coords = c(coords[, 1], coords[, 2]), crs = "EPSG:4326")
+right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble()
+right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>% pull(coords)
+# scalograms ---------
+spp <- right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>%
+unnest(cols = coords)
+right_join(p, d) %>%
+mutate(coords = st_coordinates(.)) %>%
+as_tibble() %>%
+nest
+# scalograms ---------
+spp <- right_join(p, d) %>%
+mutate(X = st_coordinates(.)[, 1],
+Y = st_coordinates(.)[, 2]) %>%
+as_tibble() %>%
+st_as_sf(coords = c("X", "Y"), crs = "EPSG:4326") %>%
+as_Spatial()
+best_mems$lw.best
+neighs <- dnearneigh(spp, d1 = 0, d2 = 7900) #d2 close enough to best
+neighs
+listw <- nb2listw(neighs, zero.policy = TRUE, style = "W")
+plot(scalogram(spp$S, mem_dnear, nblocks = 20))
+scalogram(spp$S, mem_dnear, nblocks = 20)
+library(tidyverse)
+library(adespatial)
+library(sf)
+library(spdep)
+library(ade4)
+library(vegan)
+plot(scalogram(spp$S, mem_dnear, nblocks = 20))
+scalo <- scalogram(spp$S, mem_dnear, nblocks = 20)
+scalo
+scalo$sim
+plot(scalo)
+??s1d.curve
+adegraphics::plot(scalo)
+library(adegraphics)
+plot(scalo)
+library(adegraphics)
+plot(scalogram(spp$S, mem_dnear, nblocks = 10))
+plot(scalogram(spp$S, mem_dnear, nblocks = 5))
+plot(scalogram(spp$S, mem_dnear, nblocks = 20))
+plot(scalogram(spp$S, mem_dnear, nblocks = 20), sub = "S")
+plot(scalogram(spp$S, mem_dnear, nblocks = 20))
+colnames(spp)
+names(spp)
+spp[["S"]]
+x=names(spp)[[20]]
+x
+x=names(spp)[[18]]
+x
+plot(scalogram(spp[[x]], mem_dnear, nblocks = 20), sub = x)
+plot(scalogram(spp[[x]], mem_dnear, nblocks = 20))
+plot(scalogram(spp[, x], mem_dnear, nblocks = 20), sub = x)
+spp[, x]
+x
+spp[[x]]
+spp[, x]
+scalogram(spp[, x], mem_dnear, nblocks = 20)
+x
+plot(scalogram(spp[, names(spp)[, i]], mem_dnear, nblocks = 20), sub = i)
+x
+spp
+spp[, 2]
+spp[, x]
+mem_dnear
+plot(scalogram(spp[, 'S'], best_mems$best.method$MEM.select, nblocks = 20))
+plot(scalogram(spp$S, best_mems$best.method$MEM.select, nblocks = 20))
+spp$S
+mem(listw)
+mem_dnear <- mem(listw)
+plot(scalogram(spp[, x], mem_dnear, nblocks = 20), sub = x)
+x
+plot(scalogram(spp[[x]], mem_dnear, nblocks = 20), sub = x)
+spp[[x]]
+spp$S
+spp[[x]]
+get(spp, x)
+spp$seasonality_water_temp
+plot(scalogram(spp[, x], mem_dnear, nblocks = 20), sub = x)
+spp[, x]
+scalogram(spp[, x], mem_dnear, nblocks = 20)
+x
+spp[, x]
+spp[[x]]
+v <- spp[[x]]
+plot(scalogram(v, mem_dnear, nblocks = 20), sub = x)
+plot(scalogram(v, mem_dnear, nblocks = 50), sub = x)
+plot(scalogram(v, mem_dnear, nblocks = 120), sub = x)
+plot(scalogram(v, mem_dnear, nblocks = 117), sub = x)
+plot(scalogram(v, mem_dnear, nblocks = 116), sub = x)
+scalo
+scalo <- scalogram(v, mem_dnear, nblocks = 116)
+scalo
+scalo$sim
+scalo$plot
+scalo$plot
+plot(scalogram(v, mem_dnear, nblocks = 116))
+plot(scalo$plot)
+scalo$obs
+plot(scalo[, 1], sub = x)
+plot(scalo[1], sub = x)
+plot(scalo[c(1:10)], sub = x)
+plot(scalo[c(3:10)], sub = x)
+scalo$pvalue
+which(scalo$pvalue <= 0.05)
+plot(scalo[which(scalo$pvalue <= 0.05)], sub = x)
+plot(scalo[which(scalo$pvalue <= 0.1)], sub = x)
+plot(scalo[which(scalo$pvalue <= 0.5)], sub = x)
+length(3:22)
+cairo_pdf("figures/scalograms.pdf",
+width = 10,
+height = 12)
+length(3:22)
+for (x in names(spp)[3:22]) {
+v <- spp[[x]]
+scalo <- scalogram(v, mem_dnear, nblocks = 116)
+plot(scalo[which(scalo$pvalue <= 0.5)], sub = x)
+}
+dev.off()
+cairo_pdf("figures/scalograms.pdf",
+width = 10,
+height = 12)
+par(mfrow = c(5, 4))
+for (x in names(spp)[3:5]) {
+v <- spp[[x]]
+scalo <- scalogram(v, mem_dnear, nblocks = 116)
+plot(scalo[which(scalo$pvalue <= 0.5)], sub = x)
+}
+dev.off()
+cairo_pdf("figures/scalograms.pdf",
+width = 6,
+height = 4)
+for (x in names(spp)[3:5]) {
+v <- spp[[x]]
+scalo <- scalogram(v, mem_dnear, nblocks = 116)
+plot(scalo[which(scalo$pvalue <= 0.5)], sub = x)
+plot.new()
+}
+dev.off()
+cairo_pdf("figures/scalograms.pdf",
+width = 6,
+height = 4,
+onefile = TRUE)
+for (x in names(spp)[3:5]) {
+v <- spp[[x]]
+scalo <- scalogram(v, mem_dnear, nblocks = 116)
+plot(scalo[which(scalo$pvalue <= 0.5)], sub = x)
+plot.new()
+}
+dev.off()
+cairo_pdf("figures/scalograms.pdf",
+width = 6,
+height = 4,
+onefile = TRUE)
+for (x in names(spp)[3:22]) {
+v <- spp[[x]]
+scalo <- scalogram(v, mem_dnear, nblocks = 116)
+plot(scalo[which(scalo$pvalue <= 0.5)], sub = x)
+}
+dev.off()
+library(tidyverse)
+library(sf)
+library(ncdf4)
+ctd <- nc_open("/home/eb97ziwi/Documents/databases/NOAA_thermoclines/1.1/data/0-data/WODCTDtempNCEI.nc")
+xbt <- nc_open("/home/eb97ziwi/Documents/databases/NOAA_thermoclines/1.1/data/0-data/WODXBTtempNCEI.nc")
+names(ctd$var)
+p <- tibble(lon = ncvar_get(ctd, "Longitude") - 200, #see Chu & Fan 2019
+lat = ncvar_get(ctd, "Latitude"),
+iso_depth = ncvar_get(ctd, "IsoLayerDepth"),
+year = ncvar_get(ctd, "year")) %>%
+group_by(lon, lat) %>%
+summarize(avg_iso_depth = mean(iso_depth, na.rm = TRUE)) %>%
+ungroup() %>%
+st_as_sf(coords = c("lon", "lat"))
+p
+library(raster)
+range(p$geometry)
+p
+# rasterize ctd --------
+r_template <- raster(p)
+r_template
+# rasterize ctd --------
+r_template <- raster(p, nrows = 1000, ncols = 1000)
+r_template
+plot(r_template)
+r_template
+# rasterize ctd --------
+r_template <- raster(p, nrows = 1000, ncols = 1000, values = TRUE)
+r_template
+# rasterize ctd --------
+r_template <- raster(p, nrows = 1000, ncols = 1000, vals = p$avg_iso_depth)
+r_template
+install.packages("fasterize")
+r_ctd <- fasterize::fasterize(p, r_template, field = "avg_iso_depth")
+install.packages("fasterize")

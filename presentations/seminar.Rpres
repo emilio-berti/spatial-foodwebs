@@ -1,0 +1,316 @@
+Seminar
+========================================================
+author: Emilio Berti
+date: 
+autosize: true
+
+The problem
+========================================================
+
+```{r include=FALSE}
+library(tidyverse)
+```
+
+```{r, echo=FALSE, fig.width=20, fig.height=10}
+par(mfrow = c(1, 2))
+g1 <- igraph::sample_smallworld(1, 50, 10, 0.1)
+igraph::plot.igraph(g1)
+```
+
+The problem
+========================================================
+
+```{r, echo=FALSE, fig.width=20, fig.height=10}
+par(mfrow = c(1, 2))
+igraph::plot.igraph(g1)
+g2 <- igraph::as.undirected(igraph::sample_fitness_pl(50, 200, 2, 3))
+igraph::plot.igraph(g2)
+```
+
+The problem
+========================================================
+
+```{r, echo=FALSE, fig.width=20, fig.height=10}
+source("~/Proj/macro-net/env-net-dist/R/network-metrics.R")
+fw1 <- network_metrics(g1)
+fw2 <- network_metrics(g2)
+bind_rows(fw1 %>% mutate(graph = "1"), 
+          fw2 %>% mutate(graph = "2")) %>% 
+  pivot_longer(cols = 1:(ncol(.) - 1)) %>% 
+  filter(!is.nan(value), is.finite(value)) %>% 
+  ggplot() +
+  aes(name, value, col = graph) +
+  geom_point(size = 5) +
+  ggsci::scale_color_startrek() +
+  theme_bw() +
+  coord_flip() +
+  xlab("Food web property") +
+  ylab("") +
+  theme(text = element_text(size = 28))
+```
+
+The problem
+========================================================
+```{r, echo=FALSE, fig.width=20, fig.height=10}
+source("~/Proj/macro-net/env-net-dist/R/network-metrics.R")
+fw1 <- network_metrics(g1)
+fw2 <- network_metrics(g2)
+bind_rows(fw1 %>% mutate(graph = "1"), 
+          fw2 %>% mutate(graph = "2")) %>% 
+  pivot_longer(cols = 1:(ncol(.) - 1)) %>% 
+  filter(!is.nan(value), is.finite(value)) %>% 
+  ggplot() +
+  aes(name, value, col = graph) +
+  geom_point(size = 5) +
+  ggsci::scale_color_startrek() +
+  theme_bw() +
+  coord_flip() +
+  xlab("Food web property") +
+  ylab("") +
+  theme(text = element_text(size = 28))
+```
+
+## Why?
+
+The problem
+========================================================
+![Local processes](silkeborg.jpeg)
+
+**Local processes (e.g., available species pool)**
+
+***
+
+The problem
+========================================================
+![Local processes](silkeborg.jpeg)
+
+**Local processes (e.g., available species pool)**
+
+***
+
+![Envorinment](silkeborg-ph.png)
+
+**Environmental factors (e.g., pH)**
+
+Approach summary
+========================================================
+
+* Gateway database
+* Environmental predictors from several databases
+* Multivariate analysis that includes spatial structure
+
+Gateway database
+========================================================
+
+```{r, echo=FALSE, fig.width=20, fig.height=10}
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+coast <- ne_coastline(scale = "medium", returnclass = "sf")
+p <- st_read("~/Proj/gateway-server/data/gw_coords.shp", quiet = TRUE)
+ggplot() +
+  geom_sf(data = coast, col = "grey50") +
+  geom_sf(data = p, aes(col = ecsyst_), size = 7) +
+  scale_color_manual(name = "Ecosystem type",
+                     values = RColorBrewer::brewer.pal(5, "Set2")) +
+  theme_void() +
+  theme(text = element_text(size = 36))
+```
+
+For now, focusing only on marine ecosystem.
+
+Environmental predictors
+========================================================
+![predictors](predictors.png)
+
+Environmental predictors
+========================================================
+![predictors](pca.png)
+
+***
+
+Environmental predictors
+========================================================
+![predictors](pca.png)
+
+***
+
+```{r echo=FALSE}
+read_csv("vif.csv", col_types = cols()) %>% 
+  knitr::kable()
+```
+
+Multivariate analysis: space
+========================================================
+1. Define food webs that are neighbors, i.e., connected or not (adjacency matrix).
+2. Weight the links using a defined distance function (Spatial weighting matrix; SWM).
+
+```{r, echo=FALSE, fig.width=20, fig.height=10}
+lw.best <- read_rds("../analysis-output/best_lw.rds")
+plot(coast$geometry)
+spp <- as_Spatial(p)
+points(spp, pch = 20, col = adjustcolor("red", alpha.f = 0.5), cex = 3)
+lines(spdep::listw2lines(lw.best, spp), col = adjustcolor("blue", alpha.f = 0.5), cex = 2)
+```
+
+Multivariate analysis: space
+========================================================
+1. Define food webs that are neighbors, i.e., connected or not (adjacency matrix).
+2. Weight the links using a defined distance function (Spatial weighting matrix; SWM).
+
+![distance-weight](distance-weight.png)
+
+Multivariate analysis: space
+========================================================
+1. Define food webs that are neighbors, i.e., connected or not (adjacency matrix).
+2. Weight the links using a defined distance function (Spatial weighting matrix; SWM).
+3. Obtain Moran's Eigenvector Maps (MEMs): MEMs are orthogonal vectors with a unit norm that maximize Moran’s coefficient of spatial autocorrelation.
+
+Multivariate analysis: space
+========================================================
+1. Define food webs that are neighbors, i.e., connected or not (adjacency matrix).
+2. Weight the links using a defined distance function (Spatial weighting matrix; SWM).
+3. Obtain Moran's Eigenvector Maps (MEMs): MEMs are orthogonal vectors with a unit norm that maximize Moran’s coefficient of spatial autocorrelation.
+4. Select MEMs that are significant in explaining the food web properties
+
+![distance-weight](mems.png)
+
+Multivariate analysis: space
+========================================================
+1. Define food webs that are neighbors, i.e., connected or not (adjacency matrix).
+2. Weight the links using a defined distance function (Spatial weighting matrix; SWM).
+3. Obtain Moran's Eigenvector Maps (MEMs): MEMs are orthogonal vectors with a unit norm that maximize Moran’s coefficient of spatial autocorrelation.
+4. Select MEMs that are significant in explaining the food web properties
+5. Redundancy analysis (RDA), aka the constrained PCA or the multivariate extension of multiple linear regression. 
+
+RDA performs a PCA between a response matrix **R** and a predictor matrix **P** with principal components being linear combinations of **R** and **P**.
+
+RDA finds those components of **R** which are linear combinations of **R** and (among those) represent as much variance of **R** as possible.
+
+Redundancy analysis
+========================================================
+```{r include=FALSE}
+library(tidyverse)
+library(adespatial)
+library(sf)
+library(spdep)
+library(ade4)
+library(vegan)
+source("~/Proj/macro-net/env-net-dist/R/utilities.R")
+
+# network properties
+net <- st_read("../data/marine.shp") %>% 
+  transmute(foodweb.name = fdwb_nm,
+            geographic.location = ggrphc_) %>% 
+  left_join(read_csv("~/Proj/macro-net/env-net-dist/data/network_metrics.csv")) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
+  st_drop_geometry()
+# environmental variables
+env <- read_csv("../data/env.csv")
+# Moran's Eigenvector Maps
+mems <- read_csv("../data/mems.csv")
+d <- left_join(net, env) %>% 
+  left_join(mems)
+d <- d %>% 
+  filter_all(all_vars(!is.na(.)))
+response <- d[, colnames(net)[3:16]] %>% 
+  as_tibble()
+predictors <- d[, c(colnames(env)[2:ncol(env)],
+                    colnames(mems)[2:ncol(mems)])] %>% 
+  as_tibble()
+```
+
+```{r}
+pca <- dudi.pca(response,
+                scale = TRUE,
+                scannf = FALSE,
+                nf = 3)
+rda <- pcaiv(pca,
+             predictors,
+             scannf = FALSE,
+             nf = 2)
+```
+
+```{r echo=FALSE, fig.width=20, fig.height=10}
+bind_rows(
+  rda$co %>% 
+    tibble() %>% 
+    mutate(var = rownames(rda$co),
+           type = "food web property"),
+  rda$cor[!grepl("MEM", rownames(rda$cor)), ] %>% 
+    tibble() %>% 
+    mutate(var = rownames(rda$cor)[!grepl("MEM", rownames(rda$cor))],
+           type = "environmental predictor") %>% 
+    rename_with(~gsub("RS", "Comp", .x), starts_with("RS")),
+  rda$cor[grepl("MEM", rownames(rda$cor)), ] %>% 
+    tibble() %>% 
+    mutate(var = rownames(rda$cor)[grepl("MEM", rownames(rda$cor))],
+           type = "MEM") %>% 
+    rename_with(~gsub("RS", "Comp", .x), starts_with("RS"))
+) %>%
+  ggplot() +
+  geom_segment(aes(x = 0, xend = Comp1,
+                   y = 0, yend = Comp2,
+                   col = type),
+               arrow = arrow(length = unit(0.03, "npc"))) +
+  geom_text(aes(x = Comp1, y = Comp2 * 1.1, label = var)) +
+  scale_color_manual(values = c("tomato", "steelblue", "forestgreen")) +
+  theme_minimal()
+```
+
+Redundancy analysis - correlation plot
+========================================================
+```{r include=FALSE}
+angles <- bind_rows(
+  rda$co %>% 
+    tibble() %>% 
+    mutate(var = rownames(rda$co),
+           type = "response"),
+  rda$cor %>% 
+    tibble() %>% 
+    mutate(var = rownames(rda$cor),
+           type = "mem") %>% 
+    rename_with(~gsub("RS", "Comp", .x), starts_with("RS"))
+) %>% 
+  mutate(angle = modify2(Comp1, Comp2, function(x, y) get_angle(x, y))) %>%
+  select(var, angle)
+correlation <- matrix(NA, nrow = nrow(angles), ncol = nrow(angles))
+rownames(correlation) <- angles$var
+colnames(correlation) <- angles$var
+for (i in seq_len(nrow(correlation))) {
+  for (j in seq_len(ncol(correlation))) {
+    vals <- angles %>% 
+      filter(var %in% c(colnames(correlation)[j], rownames(correlation)[i])) %>% 
+      pull(angle)
+    if (length(vals) == 1) {
+      vals <- rep(vals, 2)
+    }
+    correlation[i, j] <- cos(diff(vals))
+  }
+}
+# correlatiom plot --------
+non_mems <- rownames(correlation)[!grepl("MEM", rownames(correlation))]
+```
+
+```{r, fig.width=20, fig.height=10, echo=FALSE}
+corrplot::corrplot.mixed(correlation[non_mems, non_mems],
+                         diag = NULL,
+                         lower = "number",
+                         bg = "grey20",
+                         tl.pos = "lt",
+                         tl.col = c(rep("steelblue", 14),
+                                    rep("tomato", 6),
+                                    rep("forestgreen", 14)),
+                         number.cex = 1)
+```
+
+Redundancy analysis - variation partitioning
+========================================================
+```{r fig.width=20, fig.height=10, echo=FALSE}
+vp <- vegan::varpart(pca$tab, predictors[, 1:6], predictors[, 7:18])
+plot(vp, bg = c(3, 5), Xnames = c("Environment", "Space"), cex = 4)
+```
+
+Rest
+========================================================
+And other stuff . . .
